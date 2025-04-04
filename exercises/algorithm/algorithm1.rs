@@ -2,19 +2,17 @@
 	single linked list merge
 	This problem requires you to merge two ordered singly linked lists into one ordered singly linked list
 */
-// I AM NOT DONE
 
 use std::fmt::{self, Display, Formatter};
 use std::ptr::NonNull;
-use std::vec::*;
 
 #[derive(Debug)]
-struct Node<T> {
+struct Node<T: PartialOrd+Clone> {
     val: T,
     next: Option<NonNull<Node<T>>>,
 }
 
-impl<T> Node<T> {
+impl<T: PartialOrd+Clone> Node<T> {
     fn new(t: T) -> Node<T> {
         Node {
             val: t,
@@ -23,19 +21,19 @@ impl<T> Node<T> {
     }
 }
 #[derive(Debug)]
-struct LinkedList<T> {
+struct LinkedList<T: PartialOrd+Clone> {
     length: u32,
     start: Option<NonNull<Node<T>>>,
     end: Option<NonNull<Node<T>>>,
 }
 
-impl<T> Default for LinkedList<T> {
+impl<T: PartialOrd+Clone> Default for LinkedList<T> {
     fn default() -> Self {
         Self::new()
     }
 }
 
-impl<T> LinkedList<T> {
+impl<T: PartialOrd+Clone> LinkedList<T> {
     pub fn new() -> Self {
         Self {
             length: 0,
@@ -69,20 +67,41 @@ impl<T> LinkedList<T> {
             },
         }
     }
-	pub fn merge(list_a:LinkedList<T>,list_b:LinkedList<T>) -> Self
+	pub fn merge(mut list_a:LinkedList<T>,mut list_b:LinkedList<T>) -> Self
 	{
-		//TODO
-		Self {
-            length: 0,
-            start: None,
-            end: None,
-        }
+		let mut ll = LinkedList::<T>::new();
+		let common_len = list_a.length.min(list_b.length) as i32;
+		let mut i = 0i32;
+		let mut j = 0i32;
+		loop {
+			if i == common_len || j == common_len {
+				break;
+			}
+			let a = list_a.get(i).unwrap();
+			let b = list_b.get(j).unwrap();
+			if a < b {
+				ll.add(a.clone());
+				i += 1;
+			} else {
+				ll.add(b.clone());
+				j += 1;
+			}
+		}
+		while i < list_a.length as i32 {
+			ll.add(list_a.get(i).unwrap().clone());
+			i += 1;
+		}
+		while j < list_b.length as i32{
+			ll.add(list_b.get(j).unwrap().clone());
+			j += 1;
+		}
+		ll
 	}
 }
 
 impl<T> Display for LinkedList<T>
 where
-    T: Display,
+    T: Display + PartialOrd + Clone,
 {
     fn fmt(&self, f: &mut Formatter) -> fmt::Result {
         match self.start {
@@ -94,7 +113,7 @@ where
 
 impl<T> Display for Node<T>
 where
-    T: Display,
+    T: Display + PartialOrd + Clone,
 {
     fn fmt(&self, f: &mut Formatter) -> fmt::Result {
         match self.next {

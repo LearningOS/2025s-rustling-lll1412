@@ -2,20 +2,19 @@
 	double linked list reverse
 	This problem requires you to reverse a doubly linked list
 */
-// I AM NOT DONE
 
 use std::fmt::{self, Display, Formatter};
 use std::ptr::NonNull;
 use std::vec::*;
 
 #[derive(Debug)]
-struct Node<T> {
+struct Node<T: Clone+PartialOrd> {
     val: T,
     next: Option<NonNull<Node<T>>>,
     prev: Option<NonNull<Node<T>>>,
 }
 
-impl<T> Node<T> {
+impl<T: Clone+PartialOrd> Node<T> {
     fn new(t: T) -> Node<T> {
         Node {
             val: t,
@@ -25,19 +24,19 @@ impl<T> Node<T> {
     }
 }
 #[derive(Debug)]
-struct LinkedList<T> {
+struct LinkedList<T: Clone+PartialOrd> {
     length: u32,
     start: Option<NonNull<Node<T>>>,
     end: Option<NonNull<Node<T>>>,
 }
 
-impl<T> Default for LinkedList<T> {
+impl<T: Clone+PartialOrd> Default for LinkedList<T> {
     fn default() -> Self {
         Self::new()
     }
 }
 
-impl<T> LinkedList<T> {
+impl<T: Clone+PartialOrd> LinkedList<T> {
     pub fn new() -> Self {
         Self {
             length: 0,
@@ -73,13 +72,29 @@ impl<T> LinkedList<T> {
         }
     }
 	pub fn reverse(&mut self){
-		// TODO
+		if self.length <= 1 {
+			return;
+		}
+		let mut current = self.start;
+		let mut prev = None;
+		
+		std::mem::swap(&mut self.start, &mut self.end);
+		while let Some(mut node) = current {
+			let node = unsafe { node.as_mut() };
+			let next = node.next;
+			
+			node.next = prev;
+			node.prev = next;
+			
+			prev = current;
+			current = next;
+		}
 	}
 }
 
 impl<T> Display for LinkedList<T>
 where
-    T: Display,
+    T: Display + Clone+PartialOrd,
 {
     fn fmt(&self, f: &mut Formatter) -> fmt::Result {
         match self.start {
@@ -91,7 +106,7 @@ where
 
 impl<T> Display for Node<T>
 where
-    T: Display,
+    T: Display + Clone+PartialOrd,
 {
     fn fmt(&self, f: &mut Formatter) -> fmt::Result {
         match self.next {

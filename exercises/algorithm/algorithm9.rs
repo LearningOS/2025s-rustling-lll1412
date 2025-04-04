@@ -2,11 +2,12 @@
 	heap
 	This question requires you to implement a binary heap function
 */
-// I AM NOT DONE
 
 use std::cmp::Ord;
 use std::default::Default;
+use std::fmt::Debug;
 
+#[derive(Debug)]
 pub struct Heap<T>
 where
     T: Default,
@@ -37,7 +38,51 @@ where
     }
 
     pub fn add(&mut self, value: T) {
-        //TODO
+        self.items.push(value);
+        self.count += 1;
+        self.shift_up(self.count);
+    }
+    
+    fn shift_up(&mut self, mut i: usize) {
+        loop {
+            if i == 1 {
+                break;
+            }
+            let parent_idx = self.parent_idx(i);
+            if self.compare(i, parent_idx) {
+                self.items.swap(i, parent_idx);
+            }
+            i = parent_idx;
+        }
+    }
+    
+    
+    
+    fn shift_down(&mut self, mut i: usize) {
+        loop {
+            if !self.children_present(i) {
+                break;
+            }
+            
+            let left_idx = self.left_child_idx(i);
+            let right_idx = self.right_child_idx(i);
+            let mut m = i;
+            if left_idx < self.len() && self.compare(left_idx, m) {
+                m = left_idx;
+            }
+            if right_idx < self.len() && self.compare(right_idx, m) {
+                m = right_idx;
+            }
+            if i == m {
+                break;
+            }
+            self.items.swap(m, i);
+            i = m;
+        }
+    }
+    
+    fn compare(&self, a: usize, b: usize) -> bool {
+        (self.comparator)(&self.items[a], &self.items[b])
     }
 
     fn parent_idx(&self, idx: usize) -> usize {
@@ -57,7 +102,6 @@ where
     }
 
     fn smallest_child_idx(&self, idx: usize) -> usize {
-        //TODO
 		0
     }
 }
@@ -79,13 +123,19 @@ where
 
 impl<T> Iterator for Heap<T>
 where
-    T: Default,
+    T: Default+Debug,
 {
     type Item = T;
 
     fn next(&mut self) -> Option<T> {
-        //TODO
-		None
+        if self.count == 0 {
+            return None;
+        }
+        self.items.swap(1, self.count);
+        self.count -= 1;
+        let el = self.items.pop();
+        self.shift_down(1);
+        el
     }
 }
 
